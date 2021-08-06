@@ -39,6 +39,26 @@ public class ZstdDecompressCtx extends AutoCloseBase {
     }
 
     /**
+     * Set magicless parameter for zstd.
+     *
+     * false -- FORMAT_ZSTD1 -- standart zstd frame format.
+     * true -- FORMAT_ZSTD1_MAGICLESS -- Variant of zstd frame format, without initial 4-bytes magic number.
+     *
+     * Default: false
+     */
+    public ZstdDecompressCtx setMagiclessness(boolean magicless) {
+        if (nativePtr == 0) {
+            throw new IllegalStateException("Decompression context is closed");
+        }
+        acquireSharedLock();
+        setMagiclessness0(magicless);
+        releaseSharedLock();
+        return this;
+    }
+
+    private native void setMagiclessness0(boolean magicless);
+
+    /**
      * Load decompression dictionary
      *
      * @param dict the dictionary or `null` to remove loaded dictionary

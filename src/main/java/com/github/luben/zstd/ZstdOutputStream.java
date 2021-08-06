@@ -136,6 +136,19 @@ public class ZstdOutputStream extends FilterOutputStream{
     }
 
     /**
+     * Set magicless parameter for zstd.
+     *
+     * false -- FORMAT_ZSTD1 -- standart zstd frame format.
+     * true -- FORMAT_ZSTD1_MAGICLESS -- Variant of zstd frame format, without initial 4-bytes magic number.
+     *
+     * Default: false
+     */
+    public ZstdOutputStream setMagiclessness(boolean magicless) throws IOException {
+        inner.setMagiclessness(magicless);
+        return this;
+    }
+
+    /**
      * Enable closing the frame on flush.
      *
      * This will guarantee that it can be ready fully if the process crashes

@@ -33,6 +33,7 @@ public class ZstdInputStreamNoFinalizer extends FilterInputStream {
     private final ByteBuffer srcByteBuffer;
     private final byte[] src;
     private static final int srcBuffSize = (int) recommendedDInSize();
+    private boolean magicless = false;
 
     private boolean isContinuous = false;
     private boolean frameFinished = true;
@@ -105,6 +106,22 @@ public class ZstdInputStreamNoFinalizer extends FilterInputStream {
             }
         } finally {
             dict.releaseSharedLock();
+        }
+        return this;
+    }
+
+    /**
+     * Set magicless parameter for zstd.
+     *
+     * false -- FORMAT_ZSTD1 -- standart zstd frame format.
+     * true -- FORMAT_ZSTD1_MAGICLESS -- Variant of zstd frame format, without initial 4-bytes magic number.
+     *
+     * Default: false
+     */
+    public synchronized ZstdInputStreamNoFinalizer setMagiclessness(boolean magicless) throws IOException {
+        int size = Zstd.setMagiclessness(stream, magicless);
+        if (Zstd.isError(size)) {
+            throw new IOException("Decompression error: " + Zstd.getErrorName(size));
         }
         return this;
     }

@@ -29,6 +29,7 @@ public class ZstdOutputStreamNoFinalizer extends FilterOutputStream {
     private static final int dstSize = (int) recommendedCOutSize();
     private boolean closeFrameOnFlush = false;
     private boolean frameClosed = true;
+    private boolean magicless = false;
 
     /* JNI methods */
     public static native long recommendedCOutSize();
@@ -183,6 +184,25 @@ public class ZstdOutputStreamNoFinalizer extends FilterOutputStream {
             throw new IOException("Change of parameter on initialized stream");
         }
         int size = Zstd.loadFastDictCompress(stream, dict);
+        if (Zstd.isError(size)) {
+            throw new IOException("Compression param: " + Zstd.getErrorName(size));
+        }
+        return this;
+    }
+
+    /**
+     * Set magicless parameter for zstd.
+     *
+     * false -- FORMAT_ZSTD1 -- standart zstd frame format.
+     * true -- FORMAT_ZSTD1_MAGICLESS -- Variant of zstd frame format, without initial 4-bytes magic number.
+     *
+     * Default: false
+     */
+    public synchronized ZstdOutputStreamNoFinalizer setMagiclessness(boolean magicless) throws IOException {
+        if (!frameClosed) {
+            throw new IOException("Change of parameter on initialized stream");
+        }
+        int size = Zstd.setMagiclessness(stream, magicless);
         if (Zstd.isError(size)) {
             throw new IOException("Compression param: " + Zstd.getErrorName(size));
         }

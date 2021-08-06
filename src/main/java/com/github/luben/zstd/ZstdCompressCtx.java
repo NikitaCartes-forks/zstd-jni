@@ -71,6 +71,25 @@ public class ZstdCompressCtx extends AutoCloseBase {
     private native void setChecksum0(boolean checksumFlag);
 
     /**
+     * Set magicless parameter for zstd.
+     *
+     * false -- FORMAT_ZSTD1 -- standart zstd frame format.
+     * true -- FORMAT_ZSTD1_MAGICLESS -- Variant of zstd frame format, without initial 4-bytes magic number.
+     *
+     * Default: false
+     */
+    public ZstdCompressCtx setMagiclessness(boolean magicless) {
+        if (nativePtr == 0) {
+            throw new IllegalStateException("Compression context is closed");
+        }
+        acquireSharedLock();
+        setMagiclessness0(magicless);
+        releaseSharedLock();
+        return this;
+    }
+    private native void setMagiclessness0(boolean magicless);
+
+    /**
      * Enable or disable content size
      * @param contentSizeFlag Content size will be written into frame header _whenever known_, default: true
      */

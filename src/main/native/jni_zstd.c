@@ -285,6 +285,17 @@ JNIEXPORT jint JNICALL Java_com_github_luben_zstd_Zstd_setCompressionWorkers
 
 /*
  * Class:     com_github_luben_zstd_Zstd
+ * Method:    setFormat
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_com_github_luben_zstd_Zstd_setMagiclessness
+  (JNIEnv *env, jclass obj, jlong stream, jboolean magicless) {
+    jclass clazz = (*env)->GetObjectClass(env, obj);
+    return ZSTD_CCtx_setParameter((ZSTD_CCtx *)(intptr_t) stream, ZSTD_c_format, magicless ? 1 : 0);
+}
+
+/*
+ * Class:     com_github_luben_zstd_Zstd
  * Methods:   header constants access
  * Signature: ()I
  */

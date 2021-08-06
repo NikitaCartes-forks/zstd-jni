@@ -69,6 +69,19 @@ public class ZstdInputStream extends FilterInputStream {
         return this;
     }
 
+    /**
+     * Set magicless parameter for zstd.
+     *
+     * false -- FORMAT_ZSTD1 -- standart zstd frame format.
+     * true -- FORMAT_ZSTD1_MAGICLESS -- Variant of zstd frame format, without initial 4-bytes magic number.
+     *
+     * Default: false
+     */
+    public ZstdInputStream setMagiclessness(boolean magicless) throws IOException {
+        inner.setMagiclessness(magicless);
+        return this;
+    }
+
     public boolean getContinuous() {
         return inner.getContinuous();
     }

@@ -728,6 +728,32 @@ class ZstdSpec extends FlatSpec with Checkers {
     }
 
   for (level <- levels)
+    "ZstdOutputStream magicless" should s"produce 4 byte smaller file than zstd binary at level $level" in {
+      val file = new File("src/test/resources/xml")
+      val length = file.length.toInt
+      val fis  = new FileInputStream(file)
+      val buff = Array.fill[Byte](length)(0)
+      var pos  = 0
+      while( pos < length) {
+        pos += fis.read(buff, pos, length - pos)
+      }
+
+      val os  = new ByteArrayOutputStream(Zstd.compressBound(file.length).toInt)
+      val zos = new ZstdOutputStream(os, level)
+      val zop = zos.setMagiclessness(true)
+      zop.write(buff(0).toInt)
+      zop.write(buff, 1, length - 1)
+      zop.close()
+
+      val compressed = os.toByteArray.toSeq
+      val zst = Source.fromFile(s"src/test/resources/xml-$level.zst")(Codec.ISO8859).map{char => char.toByte}.to[WrappedArray]
+
+      if ((zst.length == (compressed.length - 4)) && (compressed endsWith(zst))) {
+        sys.error(s"Failed original ${zst.length} != ${compressed.length} result")
+      }
+    }
+
+  for (level <- levels)
     "ZstdDirectBufferCompressingStream" should s"produce the same compressed file as zstd binary at level $level" in {
       val file = new File("src/test/resources/xml")
       val length = file.length.toInt
@@ -856,6 +882,7 @@ class ZstdSpec extends FlatSpec with Checkers {
     assert(!largeBuf1.eq(largeBuf3))
     assert(!largeBuf2.eq(largeBuf3))
     assert(largeBuf4.eq(largeBuf2))
+    assert(largeBuf5.eq(largeBuf1))
     assert(largeBuf5.eq(largeBuf1))
     assert(!largeBuf6.eq(largeBuf1))
     assert(!largeBuf6.eq(largeBuf2))
